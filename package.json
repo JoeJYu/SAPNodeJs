@@ -6,5 +6,8 @@
   "dependencies": {
     "express": "^4.18.1",
     "@sap/hana-client": "^2.13.13"
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }
