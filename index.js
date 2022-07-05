@@ -20,7 +20,8 @@ conn.connect(conn_params, function (err) {
 
     // Put listener for Photoelectric barrier here
     app.post('/increment', (req, res) => {
-        conn.exec('Insert into Raspdata values (1,1656776689, 0, 1)', function (err, result) {
+        time = new Date(dateStr).getTime()
+        conn.exec('INSERT INTO Raspdata VALUES (1, ?, 0, 1)', [time], function (err, result) {
             if (err) { res.send(err) };
             console.log("Increment:", result);
             res.send("Incremented counter")
@@ -29,9 +30,10 @@ conn.connect(conn_params, function (err) {
 
 
     app.post('/decrement', (req, res) => {
-        conn.exec('Insert into Raspdata values (1,1656776689, 0, -1)', function (err, result) {
+        time = new Date(dateStr).getTime()
+        conn.exec('INSERT INTO Raspdata VALUES (1, ?, 0, -1)', [time], function (err, result) {
             if (err) { res.send(err) };
-            console.log("Increment:", result);
+            console.log("Decrement:", result);
             res.send("Decremented counter")
         })
     })
