@@ -20,7 +20,7 @@ conn.connect(conn_params, function (err) {
 
     // Put listener for Photoelectric barrier here
     app.post('/increment', (req, res) => {
-        conn.exec('UPDATE Raspdata SET counter = counter + 1 WHERE id = ?', [1], function (err, result) {
+        conn.exec('Insert into Raspdata values (1,1656776689, 0, 1)', [1], function (err, result) {
             if (err) { res.send(err) };
             console.log("Increment:", result);
             res.send("Incremented counter")
@@ -29,7 +29,7 @@ conn.connect(conn_params, function (err) {
 
 
     app.post('/decrement', (req, res) => {
-        conn.exec('UPDATE Raspdata SET counter = counter - 1 WHERE id = ?', [1], function (err, result) {
+        conn.exec('Insert into Raspdata values (1,1656776689, 0, -1)', [1], function (err, result) {
             if (err) { res.send(err) };
             console.log("Increment:", result);
             res.send("Decremented counter")
