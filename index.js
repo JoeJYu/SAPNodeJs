@@ -30,7 +30,7 @@ conn.connect(conn_params, function (err) {
 
 
     app.post('/decrement', (req, res) => {
-        time = new Date().getTime()
+        //time = new Date().getTime()
         conn.exec('INSERT INTO Raspdata VALUES (1, 24, 0, -1)', [124], function (err, result) {
             if (err) { res.send(err) };
             console.log("Decrement:", result);
