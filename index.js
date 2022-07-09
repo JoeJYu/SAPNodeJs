@@ -42,7 +42,7 @@ conn.connect(conn_params, function (err) {
             if (err) { res.send(err) }
             else { 
                 //test
-                res.send(result.ts) 
+                res.send(result["TS"], result.ts, result) 
             }
         })
     })
