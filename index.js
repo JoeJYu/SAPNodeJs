@@ -40,7 +40,10 @@ conn.connect(conn_params, function (err) {
     app.get('/', (req, res) => {
         conn.exec('SELECT * FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', function (err, result) {
             if (err) { res.send(err) }
-            else { res.send(result) }
+            else { 
+                //test
+                res.send(result.ts) 
+            }
         })
     })
 
