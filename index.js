@@ -44,6 +44,13 @@ conn.connect(conn_params, function (err) {
         })
     })
 
+    app.get('/occupancies', (req, res) => {
+        conn.exec('SELECT EXTRACT(YEAR FROM TS) as Year, EXTRACT(MONTH FROM TS) as MONTH, EXTRACT(DAY FROM TS) as DAY, CONCAT((EXTRACT(HOUR FROM TS)),(cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36)))) as TIMEINTERVAL, MEDIAN(COUNTER) FROM RASPDATA GROUP BY EXTRACT(YEAR FROM TS), EXTRACT(MONTH FROM TS), EXTRACT(DAY FROM TS), CONCAT((EXTRACT(HOUR FROM TS)),(cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36))))', function (err, result) {
+            if (err) { res.send(err) }
+            else { res.send(result) }
+        })
+    })
+
 
     app.listen(process.env.PORT || 3000,
         () => console.log("Server is running..."));
