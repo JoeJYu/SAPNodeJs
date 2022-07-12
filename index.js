@@ -18,7 +18,7 @@ var conn_params = {
 conn.connect(conn_params, function (err) {
     if (err) throw err;
     console.log("Connection established");
-    app.use(cors({ origin: "http://localhost:3000"}))
+    app.use(cors()) // Allow everything
     // Put listener for Photoelectric barrier here
     app.post('/increment', (req, res) => {
         conn.exec('INSERT INTO RASPDATA (counter) SELECT counter + ? FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', [1], function (err, result) {
