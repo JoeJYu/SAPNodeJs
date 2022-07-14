@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require("cors")
 const app = express()
+const request = require('request');
 
 var hana = require('@sap/hana-client');
 
@@ -19,6 +20,39 @@ conn.connect(conn_params, function (err) {
     if (err) throw err;
     console.log("Connection established");
     app.use(cors()) // Allow everything
+    app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        next();
+    });
+
+    // MENSA DATA
+    app.get('/meal-of-week', (req, res) => {
+        const { year, kw } = req.query;
+        request(
+            { url: `https://tum-dev.github.io/eat-api/mensa-garching/${year}/${kw}.json` },
+            (error, response, body) => {
+                if (error || response.statusCode !== 200) {
+                    return res.status(500).json({ type: 'error', message: err.message });
+                }
+
+                res.json(JSON.parse(body));
+            }
+        )
+    });
+
+    app.get('/mensa-garching', (req, res) => {
+        request(
+            { url: 'https://tum-dev.github.io/eat-api/enums/canteens.json' },
+            (error, response, body) => {
+                if (error || response.statusCode !== 200) {
+                    return res.status(500).json({ type: 'error', message: err.message });
+                }
+                const mensaInfo = JSON.parse(body).find((mensa) => mensa.enum_name === "MENSA_GARCHING");
+                res.json(mensaInfo);
+            }
+        )
+    });
+
     // Put listener for Photoelectric barrier here
     app.post('/increment', (req, res) => {
         conn.exec('INSERT INTO RASPDATA (counter) SELECT counter + ? FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', [1], function (err, result) {
