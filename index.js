@@ -71,6 +71,14 @@ conn.connect(conn_params, function (err) {
         })
     })
 
+    //reset
+    app.post('/reset', (req, res) => {
+        conn.exec('INSERT INTO RASPDATA (counter) VALUES(0)', function (err, result) {
+            if (err) { res.send(err) };
+            console.log("Resetted:", result);
+            res.send("Resetted counter")
+        })
+    })
 
     app.get('/', (req, res) => {
         conn.exec('SELECT * FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', function (err, result) {
