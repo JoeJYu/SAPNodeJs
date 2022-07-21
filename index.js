@@ -29,7 +29,7 @@ conn.connect(conn_params, function (err) {
     app.get('/meal-of-week', (req, res) => {
         const { year, kw } = req.query;
         request(
-            { url: `https://tum-dev.github.io/eat-api/mensa-garching/${year}/${kw}.json` },
+            { url: `https://tum-dev.github.io/eat-api/en/mensa-garching/${year}/${kw}.json` },
             (error, response, body) => {
                 if (error || response.statusCode !== 200) {
                     return res.status(500).json({ type: 'error', message: err.message });
