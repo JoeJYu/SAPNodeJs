@@ -20,7 +20,7 @@ var conn_params = {
     pwd: 'Mensalyzer2022!'
 };
 
-// open DB connection
+//open DB connection
 conn.connect(conn_params, function (err) {
     if (err) throw err;
     console.log("Connection established");
@@ -29,7 +29,8 @@ conn.connect(conn_params, function (err) {
         res.header('Access-Control-Allow-Origin', '*');
         next();
     });
-
+    
+    //endpoint to retrieve the menu details of a week of the mensa in garching
     app.get('/meal-of-week', (req, res) => {
         const { year, kw } = req.query;
         request(
@@ -44,6 +45,7 @@ conn.connect(conn_params, function (err) {
         )
     });
 
+    //endpoint to retrieve general information of the mensa in garching
     app.get('/mensa-garching', (req, res) => {
         request(
             { url: 'https://tum-dev.github.io/eat-api/enums/canteens.json' },
