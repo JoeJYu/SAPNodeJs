@@ -27,6 +27,22 @@ var conn_params = {
 conn.connect(conn_params, function (err) {
     if (err) throw err;
     console.log("Connection established");
+
+    console.log("Analyze Database…")
+    conn.exec('SELECT * FROM RASPDATA', [], function (err, result) {
+        if (err) { res.send(err) };
+
+        if (result.length === 0) {
+            console.log("Prepare Database for first usage…")
+            conn.exec('INSERT INTO RASPDATA (counter) VALUES (0)', [], function (err, result) {
+                if (err) { res.send("Error during initial setup" + err) };
+
+                console.log("Database preparation finished!")
+            })
+        }
+        console.log("Database Analysis completed.")
+    })
+    
     app.use(cors()) // Allow everything
     app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
