@@ -1,9 +1,11 @@
 //loading necessary modules
+//Section 1: modules
 const express = require('express')
 const cors = require("cors")
 const app = express()
 const request = require('request');
 
+//Section 2: SAP HANA client
 var hana = require('@sap/hana-client');
 
 //connect Node.js to SAP HANA Service Instance
@@ -20,6 +22,7 @@ var conn_params = {
     pwd: 'Mensalyzer2022!'
 };
 
+//Section 3: DB connection
 //open DB connection
 conn.connect(conn_params, function (err) {
     if (err) throw err;
@@ -30,7 +33,8 @@ conn.connect(conn_params, function (err) {
         next();
     });
     
-    //endpoint to retrieve the menu details of a week of the mensa in garching
+//Section 4: Endpoints Mensa information and menu
+    //Endpoint 1: to retrieve the menu details of a week of the mensa in garching
     app.get('/meal-of-week', (req, res) => {
         const { year, kw } = req.query;
         request(
@@ -45,7 +49,7 @@ conn.connect(conn_params, function (err) {
         )
     });
 
-    //endpoint to retrieve general information of the mensa in garching
+    //Endpoint 2: to retrieve general information of the mensa in garching
     app.get('/mensa-garching', (req, res) => {
         request(
             { url: 'https://tum-dev.github.io/eat-api/enums/canteens.json' },
@@ -59,7 +63,8 @@ conn.connect(conn_params, function (err) {
         )
     });
 
-    //endpoint to increase the counter by 1 --> adding a new row into the database with updated counter
+//Section 5: endpoints for raspberry pi to call
+    //Endpoint 3: to increase the counter by 1 --> adding a new row into the database with updated counter
     //whenever someone crosses the photelectric barrier into the positive direction (going inside), this endpoint is called by the raspberry pi
     app.post('/increment', (req, res) => {
         conn.exec('INSERT INTO RASPDATA (counter) SELECT counter + ? FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', [1], function (err, result) {
@@ -69,7 +74,7 @@ conn.connect(conn_params, function (err) {
         })
     })
 
-    //endpoint to decrease the counter by 1 --> adding a new row into the database with updated counter
+    //Endpoint 4: to decrease the counter by 1 --> adding a new row into the database with updated counter
     //whenever someone crosses the photelectric barrier into the negative direction (going outside), this endpoint is called by the raspberry pi
     app.post('/decrement', (req, res) => {
         conn.exec('INSERT INTO RASPDATA (counter) SELECT counter + ? FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', [-1], function (err, result) {
@@ -79,7 +84,8 @@ conn.connect(conn_params, function (err) {
         })
     })
 
-    //endpoint to reset the counter to 0 
+//Section 6: endpoints to retrieve information from HANA DB and to reset the counter
+    //Endpoint 5: to reset the counter to 0 
     app.post('/reset', (req, res) => {
         conn.exec('INSERT INTO RASPDATA (counter) VALUES(0)', function (err, result) {
             if (err) { res.send(err) };
@@ -88,7 +94,7 @@ conn.connect(conn_params, function (err) {
         })
     })
 
-    //endpoint to retrieve the newest counter entry of the database 
+    //Endpoint 6: to retrieve the newest counter entry of the database 
     //used to display the live occupancy in the web app
     app.get('/', (req, res) => {
         conn.exec('SELECT * FROM RASPDATA c1 WHERE c1.ts = (SELECT MAX(ts) FROM RASPDATA)', function (err, result) {
@@ -97,15 +103,21 @@ conn.connect(conn_params, function (err) {
         })
     })
 
-    //endpoint to retrieve the occupancy development
+    //Endpoint 7: to retrieve the occupancy development
     //used to display the development of occupancies as a bar chart in the web app
     app.get('/occupancies', (req, res) => {
-        conn.exec('SELECT EXTRACT(YEAR FROM TS) as Year, EXTRACT(MONTH FROM TS) as MONTH, EXTRACT(DAY FROM TS) as DAY, cast(EXTRACT(HOUR FROM TS)+2 as numeric(36)) as HOUR, cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36)) as MINUTESINTERVAL, MEDIAN(COUNTER) FROM RASPDATA GROUP BY EXTRACT(YEAR FROM TS), EXTRACT(MONTH FROM TS), EXTRACT(DAY FROM TS), EXTRACT(HOUR FROM TS), cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36)) ORDER BY YEAR ASC, MONTH ASC, DAY ASC, HOUR ASC, MINUTESINTERVAL ASC', function (err, result) {
+        sqlStatement = "SELECT EXTRACT(YEAR FROM TS) as Year,  EXTRACT(MONTH FROM TS) as MONTH, EXTRACT(DAY FROM TS) as DAY, " +
+        "cast(EXTRACT(HOUR FROM TS)+2 as numeric(36)) as HOUR, cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36)) as MINUTESINTERVAL" + 
+        "MEDIAN(COUNTER) FROM RASPDATA GROUP BY EXTRACT(YEAR FROM TS), EXTRACT(MONTH FROM TS), EXTRACT(DAY FROM TS), EXTRACT(HOUR FROM TS)," +  
+        "cast(FLOOR(EXTRACT(MINUTE FROM TS)/15)*15 as numeric(36)) ORDER BY YEAR ASC, MONTH ASC, DAY ASC, HOUR ASC, MINUTESINTERVAL ASC"
+
+        conn.exec(sqlStatement, 
+        function (err, result) {
             if (err) { res.send(err) }
             else { res.send(result) }
         })
     })
-
+//Section 7: Listen and Bind connection
     //listen and bind the connections on the specified host and port
     app.listen(process.env.PORT || 5000,
         () => console.log("Server is running..."));
